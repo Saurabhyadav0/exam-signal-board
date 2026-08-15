@@ -92,7 +92,7 @@ function extractSourceCategories(post) {
   }
 }
 
-async function fetchAndParsePost(link) {
+async function fetchAndParsePost(link, title) {
   const res = await fetch(link, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) throw new Error(`post fetch failed: ${res.status} ${res.statusText}`);
   const html = await res.text();
@@ -102,6 +102,22 @@ async function fetchAndParsePost(link) {
   const applyStartMatch = /Application Begin\s*:?\s*(\d{1,2}\/\d{1,2}\/\d{4})/i.exec(text);
   const applyEndMatch = /Last Date (?:for Apply Online|to Apply)\s*:?\s*(\d{1,2}\/\d{1,2}\/\d{4})/i.exec(text);
   const examDateMatch = /Exam Date\s*:?\s*([^:]{2,40}?)(?=\s+(?:Exam City|Admit Card|Eligibility|Age Limit|$))/i.exec(text);
+
+  // Vacancy count: titles consistently say "... for 134 Post" — far more
+  // reliable across post templates than trying to parse a "Total Vacancy"
+  // table cell, which isn't present on every listing (results/admit cards
+  // often omit it even when the original recruitment did have one).
+  const vacancyMatch = /for\s+([\d,]{2,7})\s+Post/i.exec(title);
+  const vacancyCount = vacancyMatch ? parseInt(vacancyMatch[1].replace(/,/g, ""), 10) : null;
+
+  // Fee block: grab the whole "Application Fee" section as free text (tiers
+  // vary by category — General/OBC/EWS/SC/ST/PH — not worth splitting into
+  // columns when the source itself doesn't structure it consistently).
+  // Boundary includes a bare "<year> :" pattern — SarkariResult sandwiches a
+  // repeat-of-the-title subheading ("... Online Form 2026 :") right before
+  // the next real section on many pages, which would otherwise leak in.
+  const feeMatch = /Application Fee\s*(.{5,300}?)(?=Age Limit|Important Dates|How to Fill|Interested Candidates|Some Useful|\b20\d{2}\s*:|$)/i.exec(text);
+  const applicationFee = feeMatch ? feeMatch[1].trim().slice(0, 250) : null;
 
   // "Apply Online" row -> nearest link in that table row
   let applyLink = null;
@@ -117,6 +133,8 @@ async function fetchAndParsePost(link) {
     applyStart: applyStartMatch ? toIsoDate(applyStartMatch[1]) : null,
     applyEnd: applyEndMatch ? toIsoDate(applyEndMatch[1]) : null,
     examDateText: examDateMatch ? examDateMatch[1].trim() : null,
+    vacancyCount,
+    applicationFee,
     applyLink,
     minQualification: inferMinQualification(text),
     fullText: text,
@@ -137,8 +155,9 @@ async function upsertExam(client, post, parsed) {
   await client.query(
     `insert into exams (
        source_post_id, title, career_field, category, source_category,
-       min_qualification, apply_link, apply_start, apply_end, exam_date_text, updated_at
-     ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, now())
+       min_qualification, apply_link, apply_start, apply_end, exam_date_text,
+       vacancy_count, application_fee, updated_at
+     ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, now())
      on conflict (source_post_id) do update set
        title = excluded.title,
        career_field = excluded.career_field,
@@ -149,6 +168,8 @@ async function upsertExam(client, post, parsed) {
        apply_start = excluded.apply_start,
        apply_end = excluded.apply_end,
        exam_date_text = excluded.exam_date_text,
+       vacancy_count = excluded.vacancy_count,
+       application_fee = excluded.application_fee,
        updated_at = now()`,
     [
       post.id,
@@ -161,6 +182,8 @@ async function upsertExam(client, post, parsed) {
       parsed.applyStart,
       parsed.applyEnd,
       parsed.examDateText,
+      parsed.vacancyCount,
+      parsed.applicationFee,
     ]
   );
 }
@@ -182,7 +205,7 @@ async function main() {
     for (const post of posts) {
       post.sourceCategories = extractSourceCategories(post);
       try {
-        const parsed = await fetchAndParsePost(post.link);
+        const parsed = await fetchAndParsePost(post.link, decodeEntities(post.title.rendered));
         await withRetry(`upsert ${post.id}`, () => upsertExam(pool, post, parsed));
         processed++;
         console.log(`  ✓ [${post.sourceCategories.join(", ") || "uncategorized"}] ${decodeEntities(post.title.rendered)}`);

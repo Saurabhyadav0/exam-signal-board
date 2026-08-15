@@ -14,20 +14,13 @@
   <key>WorkingDirectory</key>
   <string>/Users/saurabhyadav/Desktop/EXAM reminder</string>
 
-  <!-- Fires at these hours, :15 past, every day — same cadence as the
-       GitHub Actions cron this replaces (blocked by SarkariResult's WAF
-       for datacenter IPs; this runs from your actual home IP instead). -->
+  <!-- Runs once a day at 07:00 IST. The incremental watermark means a
+       once-daily run still catches everything published since the last
+       run — nothing is skipped, it just batches into one pass instead of
+       eight. Picked 07:00 so a full day's postings (and the previous
+       overnight ones) are in before most people start checking. -->
   <key>StartCalendarInterval</key>
-  <array>
-    <dict><key>Hour</key><integer>0</integer><key>Minute</key><integer>15</integer></dict>
-    <dict><key>Hour</key><integer>3</integer><key>Minute</key><integer>15</integer></dict>
-    <dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>15</integer></dict>
-    <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>15</integer></dict>
-    <dict><key>Hour</key><integer>12</integer><key>Minute</key><integer>15</integer></dict>
-    <dict><key>Hour</key><integer>15</integer><key>Minute</key><integer>15</integer></dict>
-    <dict><key>Hour</key><integer>18</integer><key>Minute</key><integer>15</integer></dict>
-    <dict><key>Hour</key><integer>21</integer><key>Minute</key><integer>15</integer></dict>
-  </array>
+  <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>0</integer></dict>
 
   <key>RunAtLoad</key>
   <true/>

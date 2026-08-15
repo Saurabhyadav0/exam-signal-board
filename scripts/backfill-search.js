@@ -55,7 +55,7 @@ async function main() {
     for (const post of seen.values()) {
       post.sourceCategories = extractSourceCategories(post);
       try {
-        const parsed = await withRetry(`fetch ${post.link}`, () => fetchAndParsePost(post.link));
+        const parsed = await withRetry(`fetch ${post.link}`, () => fetchAndParsePost(post.link, decodeEntities(post.title.rendered)));
         // pool.query() grabs a fresh connection per call instead of holding
         // one client for the whole (multi-minute) run — the run that crashed
         // here earlier held a single client that Neon's pooler dropped while

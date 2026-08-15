@@ -29,6 +29,8 @@ create table if not exists exams (
   exam_date date,
   exam_date_text text,
   admit_card_text text,
+  vacancy_count integer,
+  application_fee text,
   updated_at timestamptz default now()
 );
 
@@ -60,6 +62,10 @@ create table if not exists ingestion_state (
 );
 insert into ingestion_state (id, last_poll) values (true, now() - interval '3 days')
   on conflict (id) do nothing;
+
+-- additive columns for tables that may already exist from an earlier version
+alter table exams add column if not exists vacancy_count integer;
+alter table exams add column if not exists application_fee text;
 
 -- lets registration be safely resubmitted without creating duplicate rows
 create unique index if not exists uq_subscriptions_user_exam
