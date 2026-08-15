@@ -14,11 +14,13 @@
   <key>WorkingDirectory</key>
   <string>/Users/saurabhyadav/Desktop/EXAM reminder</string>
 
-  <!-- 30 minutes after the 07:00 ingestion run, so the day's freshly
-       scraped exams are already in the database before dispatch checks
-       who's due for an alert. -->
+  <!-- 2 hours after the 07:00 ingestion run — wider buffer than the
+       original 30 minutes, in case ingestion runs long on a day with a
+       lot of new postings or hits a retry backoff (see withRetry in
+       ingest.js), so dispatch never checks against a stale/partial
+       exams table. -->
   <key>StartCalendarInterval</key>
-  <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+  <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
 
   <key>RunAtLoad</key>
   <false/>
