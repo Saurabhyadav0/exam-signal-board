@@ -12,6 +12,13 @@ function getPool() {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) throw new Error("DATABASE_URL is not set");
     pool = new Pool({ connectionString });
+    // Without this, a client that goes idle-then-dies (e.g. Neon's pooler
+    // dropping a connection mid-run) emits an unhandled 'error' event that
+    // crashes the whole process — even though the pool itself recovers fine
+    // by just discarding that client. This is the standard node-postgres fix.
+    pool.on("error", (err) => {
+      console.error("Idle pg client error (pool recovers automatically):", err.message);
+    });
   }
   return pool;
 }

@@ -167,9 +167,10 @@ async function upsertExam(client, post, parsed) {
 
 async function main() {
   const pool = getPool();
-  const client = await withRetry("DB connect", () => pool.connect());
   try {
-    const { rows } = await client.query("select last_poll from ingestion_state where id = true");
+    const { rows } = await withRetry("DB query", () =>
+      pool.query("select last_poll from ingestion_state where id = true")
+    );
     const lastPoll = rows[0].last_poll.toISOString();
     const runStartedAt = new Date().toISOString();
 
@@ -182,7 +183,7 @@ async function main() {
       post.sourceCategories = extractSourceCategories(post);
       try {
         const parsed = await fetchAndParsePost(post.link);
-        await upsertExam(client, post, parsed);
+        await withRetry(`upsert ${post.id}`, () => upsertExam(pool, post, parsed));
         processed++;
         console.log(`  ✓ [${post.sourceCategories.join(", ") || "uncategorized"}] ${decodeEntities(post.title.rendered)}`);
       } catch (err) {
@@ -191,15 +192,29 @@ async function main() {
       await politeDelay();
     }
 
-    await client.query("update ingestion_state set last_poll = $1 where id = true", [runStartedAt]);
+    await withRetry("watermark update", () =>
+      pool.query("update ingestion_state set last_poll = $1 where id = true", [runStartedAt])
+    );
     console.log(`Done. Processed ${processed}/${posts.length}. Watermark advanced to ${runStartedAt}.`);
   } finally {
-    client.release();
     await pool.end();
   }
 }
 
-main().catch((err) => {
-  console.error("Ingestion run failed:", err);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error("Ingestion run failed:", err);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  SOURCE,
+  USER_AGENT,
+  politeDelay,
+  withRetry,
+  decodeEntities,
+  extractSourceCategories,
+  fetchAndParsePost,
+  upsertExam,
+};

@@ -11,6 +11,9 @@ export function getPool() {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) throw new Error("DATABASE_URL is not set");
     pool = new Pool({ connectionString });
+    pool.on("error", (err) => {
+      console.error("Idle pg client error (pool recovers automatically):", err.message);
+    });
   }
   return pool;
 }
