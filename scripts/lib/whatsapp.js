@@ -59,4 +59,27 @@ async function sendWhatsAppTemplate({ to, templateName, languageCode = "en_US", 
   return { skipped: false, ok: true, messageId: data.messages?.[0]?.id };
 }
 
-module.exports = { isAllowedRecipient, normalizeNumber, sendWhatsAppTemplate };
+// Only works inside the 24h session window WhatsApp opens after a recipient
+// messages the business number first — no template needed, but also not
+// usable for the actual unprompted daily alerts (that always needs an
+// approved template). Useful for confirming real delivery while a template
+// is still in review.
+async function sendWhatsAppText({ to, body }) {
+  if (!isAllowedRecipient(to)) {
+    return { skipped: true, reason: "not_in_test_recipient_allowlist" };
+  }
+  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const toE164 = `91${normalizeNumber(to)}`;
+
+  const res = await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ messaging_product: "whatsapp", to: toE164, type: "text", text: { body } }),
+  });
+  const data = await res.json();
+  if (!res.ok) return { skipped: false, ok: false, status: res.status, error: data.error };
+  return { skipped: false, ok: true, messageId: data.messages?.[0]?.id };
+}
+
+module.exports = { isAllowedRecipient, normalizeNumber, sendWhatsAppTemplate, sendWhatsAppText };
