@@ -1,6 +1,6 @@
-require("dotenv").config({ path: ".env.local" });
 const fs = require("fs");
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "..", ".env.local") });
 const { Client } = require("pg");
 
 async function main() {

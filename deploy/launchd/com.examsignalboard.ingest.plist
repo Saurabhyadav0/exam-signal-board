@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.examsignalboard.ingest</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/node</string>
+    <string>/Users/saurabhyadav/Desktop/EXAM reminder/scripts/ingest.js</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/saurabhyadav/Desktop/EXAM reminder</string>
+
+  <!-- Fires at these hours, :15 past, every day — same cadence as the
+       GitHub Actions cron this replaces (blocked by SarkariResult's WAF
+       for datacenter IPs; this runs from your actual home IP instead). -->
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>0</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Hour</key><integer>3</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Hour</key><integer>12</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Hour</key><integer>15</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Hour</key><integer>18</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Hour</key><integer>21</integer><key>Minute</key><integer>15</integer></dict>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/saurabhyadav/Library/Logs/exam-signal-board/ingest.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/saurabhyadav/Library/Logs/exam-signal-board/ingest.error.log</string>
+</dict>
+</plist>
