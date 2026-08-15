@@ -37,6 +37,7 @@ const TITLE_RULES = [
   [/\bnet\b|\btet\b|\bteacher\b|\btgt\b|\bpgt\b|\bprt\b|\blecturer\b|\bprofessor\b/i, { career_field: "Other", category: "Teaching/Research" }],
   [/\bnursing\b|\bstaff nurse\b|\bmedical\b|\baiims\b|\bneet\b|\bhealth\b/i, { career_field: "Healthcare & Medicine", category: "Medical" }],
   [/\bgate\b|\bjee\b|\bjunior engineer\b|\btechnical assistant\b/i, { career_field: "Engineering & Technology", category: "Engineering" }],
+  [/\bongc\b|\bntpc\b|\bbhel\b|\biocl\b|\bsail\b|\bpgcil\b|\bnpcil\b|\bhpcl\b|\bbpcl\b|\bgail\b|\bnhpc\b|\bhal\b|\bpsu\b|\bmanagement trainee\b|\bengineer trainee\b|\bexecutive trainee\b/i, { career_field: "Engineering & Technology", category: "Engineering" }],
   [/\bhigh court\b|\bjudicial\b|\bclat\b|\badvocate\b/i, { career_field: "Law & Legal Studies", category: "Law" }],
 ];
 

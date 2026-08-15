@@ -17,7 +17,7 @@ const {
   decodeEntities,
 } = require("./ingest");
 
-const SEARCH_TERMS = [
+const DEFAULT_SEARCH_TERMS = [
   "NCC Special Entry",
   "Coast Guard",
   "Indian Air Force",
@@ -25,6 +25,10 @@ const SEARCH_TERMS = [
   "University Entry Scheme",
   "SSB Interview",
 ];
+
+// Pass terms as CLI args to search for something else, e.g.:
+//   node scripts/backfill-search.js "ONGC Recruitment" "NTPC Recruitment"
+const SEARCH_TERMS = process.argv.length > 2 ? process.argv.slice(2) : DEFAULT_SEARCH_TERMS;
 
 async function searchPosts(term) {
   const url = new URL("/wp-json/wp/v2/posts", SOURCE);
