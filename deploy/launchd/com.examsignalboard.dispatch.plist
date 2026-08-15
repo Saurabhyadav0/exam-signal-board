@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.examsignalboard.dispatch</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/node</string>
+    <string>/Users/saurabhyadav/Desktop/EXAM reminder/scripts/dispatch.js</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/saurabhyadav/Desktop/EXAM reminder</string>
+
+  <!-- 30 minutes after the 07:00 ingestion run, so the day's freshly
+       scraped exams are already in the database before dispatch checks
+       who's due for an alert. -->
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/saurabhyadav/Library/Logs/exam-signal-board/dispatch.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/saurabhyadav/Library/Logs/exam-signal-board/dispatch.error.log</string>
+</dict>
+</plist>
