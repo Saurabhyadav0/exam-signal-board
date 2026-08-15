@@ -22,6 +22,25 @@ function politeDelay() {
   return sleep(ms);
 }
 
+// Rides through the "laptop just woke up, Wi-Fi isn't back yet" window that
+// causes ENOTFOUND/ECONNREFUSED when launchd fires a scheduled run right as
+// the machine wakes. Only retries network-shaped errors, not real bugs.
+const RETRY_DELAYS_MS = [15000, 30000, 60000];
+async function withRetry(label, fn) {
+  const isNetworkError = (err) =>
+    ["ENOTFOUND", "ECONNREFUSED", "ETIMEDOUT", "EAI_AGAIN"].includes(err.code);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt >= RETRY_DELAYS_MS.length || !isNetworkError(err)) throw err;
+      const delay = RETRY_DELAYS_MS[attempt];
+      console.warn(`  ${label} failed (${err.code}), retrying in ${delay / 1000}s...`);
+      await sleep(delay);
+    }
+  }
+}
+
 function decodeEntities(str) {
   if (!str) return str;
   return str
@@ -148,14 +167,14 @@ async function upsertExam(client, post, parsed) {
 
 async function main() {
   const pool = getPool();
-  const client = await pool.connect();
+  const client = await withRetry("DB connect", () => pool.connect());
   try {
     const { rows } = await client.query("select last_poll from ingestion_state where id = true");
     const lastPoll = rows[0].last_poll.toISOString();
     const runStartedAt = new Date().toISOString();
 
     console.log(`Polling posts after ${lastPoll} ...`);
-    const posts = await fetchNewPosts(lastPoll);
+    const posts = await withRetry("wp-json fetch", () => fetchNewPosts(lastPoll));
     console.log(`Found ${posts.length} new/updated post(s).`);
 
     let processed = 0;
