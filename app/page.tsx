@@ -6,7 +6,8 @@ export default function Home() {
       <div className="brand">
         <span className="dot" />
         <b>Exam Signal Board</b>
-        <nav>
+        <nav style={{ display: "flex", gap: 14 }}>
+          <Link href="/manage">Manage my alerts</Link>
           <Link href="/privacy">Privacy</Link>
         </nav>
       </div>
