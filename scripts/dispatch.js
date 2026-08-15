@@ -5,7 +5,10 @@ const { getPool } = require("./lib/db");
 const { sendEmail } = require("./lib/email");
 const { sendWhatsAppTemplate, isAllowedRecipient } = require("./lib/whatsapp");
 
-const WHATSAPP_TEMPLATE = process.env.WHATSAPP_TEMPLATE_NAME || "exam_deadline_alert_v2";
+// v3 matches the email's content exactly (title, deadline, vacancies, fee,
+// link) — v1/v2 only carry title/deadline/link. Submitted so WhatsApp and
+// email format the same information the same way, not a reduced version.
+const WHATSAPP_TEMPLATE = process.env.WHATSAPP_TEMPLATE_NAME || "exam_deadline_alert_v3";
 const DRY_RUN = process.argv.includes("--dry-run");
 
 function formatDate(iso) {
@@ -27,6 +30,19 @@ function pickDueMilestone(daysLeft, alreadySent) {
   if (daysLeft <= 3) candidates.push("t-3");
   if (daysLeft <= 7) candidates.push("t-7");
   return candidates.find((m) => !alreadySent.has(m)) || null;
+}
+
+// Matches buildEmailHtml's content exactly (vacancies, fee) — WhatsApp
+// template params can't be empty strings, so unknown fields get an explicit
+// fallback instead of blowing up the send.
+function buildWhatsAppParams(exam) {
+  return [
+    exam.title,
+    formatDate(exam.apply_end),
+    exam.vacancy_count ? String(exam.vacancy_count) : "Not specified",
+    exam.application_fee ? exam.application_fee.slice(0, 90) : "See official notification",
+    exam.apply_link,
+  ];
 }
 
 function buildSubject(exam, milestone) {
@@ -147,7 +163,7 @@ async function main() {
             const result = await sendWhatsAppTemplate({
               to: user.mobile,
               templateName: WHATSAPP_TEMPLATE,
-              params: [exam.title, formatDate(exam.apply_end), exam.apply_link],
+              params: buildWhatsAppParams(exam),
             });
             if (result.ok) {
               await pool.query(
