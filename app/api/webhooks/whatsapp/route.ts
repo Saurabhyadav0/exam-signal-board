@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPool } from "@/lib/db";
 
 // Meta calls this once, at "Verify and save" time and whenever you change
 // the Callback URL, to prove you control this endpoint.
@@ -15,10 +16,16 @@ export async function GET(req: NextRequest) {
 }
 
 // Meta posts here for every message status update (sent/delivered/read/failed)
-// and every inbound message (e.g. a user replying STOP). For now this just
-// logs and acknowledges — actual STOP-handling / status tracking comes later.
+// and every inbound message (e.g. a user replying STOP). Persisted to the DB
+// rather than just console.log — a Vercel serverless function's logs aren't
+// queryable without a Vercel CLI session. Actual STOP-handling comes later.
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
-  console.log("WhatsApp webhook event:", JSON.stringify(body));
+  if (body) {
+    await getPool().query("insert into webhook_events (source, payload) values ($1, $2)", [
+      "whatsapp",
+      JSON.stringify(body),
+    ]);
+  }
   return NextResponse.json({ received: true });
 }

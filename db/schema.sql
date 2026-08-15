@@ -53,6 +53,17 @@ create table if not exists notifications_log (
   unique (user_id, exam_id, milestone, channel)
 );
 
+-- Raw WhatsApp webhook events (status callbacks, inbound replies). Exists
+-- because the alternative — console.log in a Vercel serverless function —
+-- isn't queryable without a Vercel CLI login, which this environment
+-- doesn't have. Persisting here means delivery status is actually visible.
+create table if not exists webhook_events (
+  id uuid primary key default gen_random_uuid(),
+  source text not null,
+  payload jsonb not null,
+  received_at timestamptz default now()
+);
+
 -- single-row table tracking the ingestion cron's watermark.
 -- Seeded to 3 days back so the first-ever run pulls a manageable recent
 -- batch instead of walking every post since the site's 2012 archive.
