@@ -66,9 +66,9 @@ export default function Home() {
         </div>
       </div>
 
-      <a className="cta" href="mailto:saurabh7678944135gzp@gmail.com?subject=Early%20access">
-        Request early access →
-      </a>
+      <Link className="cta" href="/register">
+        Get on the board →
+      </Link>
 
       <footer className="site">
         <span>© {new Date().getFullYear()} Exam Signal Board</span>

@@ -61,6 +61,12 @@ create table if not exists ingestion_state (
 insert into ingestion_state (id, last_poll) values (true, now() - interval '3 days')
   on conflict (id) do nothing;
 
+-- lets registration be safely resubmitted without creating duplicate rows
+create unique index if not exists uq_subscriptions_user_exam
+  on subscriptions(user_id, exam_id) where exam_id is not null;
+create unique index if not exists uq_subscriptions_user_category
+  on subscriptions(user_id, category) where category is not null;
+
 create index if not exists idx_exams_category on exams(category);
 create index if not exists idx_exams_apply_end on exams(apply_end);
 create index if not exists idx_subscriptions_user on subscriptions(user_id);

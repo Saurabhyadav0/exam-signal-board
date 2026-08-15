@@ -162,3 +162,76 @@ footer.site a { color: var(--ink-faint); }
 .policy h2 { margin-top: 32px; }
 .policy p, .policy li { color: var(--ink-muted); font-size: 14.5px; }
 .policy ul { padding-left: 20px; }
+
+/* ---------- registration form ---------- */
+
+button.cta {
+  border: none; cursor: pointer; font-family: 'Public Sans', sans-serif;
+}
+button.cta:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn-ghost {
+  display: inline-block; background: transparent; border: 1.5px solid var(--line); color: var(--ink);
+  font-weight: 700; font-size: 14.5px; padding: 12px 20px; border-radius: 11px; cursor: pointer;
+  font-family: 'Public Sans', sans-serif;
+}
+
+.reg-stepper { display: flex; gap: 6px; margin: 24px 0 8px; }
+.reg-seg { flex: 1; height: 3px; border-radius: 2px; background: var(--line); }
+.reg-seg.active { background: var(--accent); }
+.reg-seg.done { background: var(--teal); }
+
+.reg-nav { display: flex; gap: 10px; margin-top: 26px; align-items: center; }
+
+section { margin-top: 32px; }
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-muted); margin-bottom: 6px;
+}
+.field input {
+  width: 100%; padding: 13px 14px; border-radius: 10px; border: 1.5px solid var(--line);
+  background: var(--surface); color: var(--ink); font-size: 15px; font-family: 'Public Sans', sans-serif;
+}
+.field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.chip-group { margin-bottom: 20px; }
+.chip-group .gl { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-muted); margin-bottom: 8px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 1.5px solid var(--line); background: var(--surface); color: var(--ink);
+  padding: 8px 15px; border-radius: 999px; font-weight: 600; font-size: 13.5px; cursor: pointer;
+  font-family: 'Public Sans', sans-serif;
+}
+.chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.cat-block { margin: 22px 0; }
+.cat-title {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 8px;
+}
+.exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-top: 8px; }
+.exam-card {
+  display: flex; align-items: center; gap: 10px; text-align: left; width: 100%;
+  border: 1.5px solid var(--line); background: var(--surface); border-radius: 10px; padding: 11px 12px;
+  cursor: pointer; font-family: 'Public Sans', sans-serif;
+}
+.exam-card.catch-all { background: var(--surface-2); font-weight: 600; }
+.exam-card .box {
+  width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid var(--line-strong); flex: none;
+}
+.exam-card.on .box { background: var(--teal); border-color: var(--teal); }
+.exam-card.on { border-color: var(--teal); background: var(--teal-soft); }
+.exam-card .name { font-size: 13.5px; }
+
+.switch-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  border: 1.5px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px;
+  font-weight: 600; font-size: 14.5px; background: var(--surface); cursor: pointer;
+}
+.switch-row input { width: 20px; height: 20px; }
+
+.consent {
+  display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: var(--ink-muted); margin: 16px 0;
+}
+.consent input { margin-top: 3px; }
